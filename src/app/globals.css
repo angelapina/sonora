@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Sistema de diseño Sonora v2 — dirección Apple × Spotify:
+   base neutra (blanco / negro / grises), un único acento de marca
+   (coral), tipografía Geist a varios pesos, radios sutiles, sombras
+   casi imperceptibles y mucho aire. Los nombres de los tokens se
+   mantienen (ink, cream, coral…) para que todo el sitio se re-pinte
+   automáticamente al cambiar sus valores aquí.
+------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #1d1d1f; /* negro Apple: texto principal y fondos oscuros */
+  --color-ink-soft: #2c2c2e; /* variante sobre fondo oscuro */
+  --color-ink-muted: #6e6e73; /* gris secundario Apple */
+  --color-cream: #ffffff; /* fondo base: blanco puro */
+  --color-cream-soft: #f5f5f7; /* gris muy claro Apple, secciones alternas */
+  --color-paper: #ffffff; /* tarjetas */
+  --color-coral: #ff5a3c; /* acento de marca Sonora — único color con personalidad */
+  --color-coral-dark: #e0451f;
+  --color-gold: #b8894a;
+  --color-line: #e5e5ea; /* hairline Apple */
+  --color-line-dark: rgba(255, 255, 255, 0.14);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-cream: var(--color-cream);
+  --color-cream-soft: var(--color-cream-soft);
+  --color-paper: var(--color-paper);
+  --color-coral: var(--color-coral);
+  --color-coral-dark: var(--color-coral-dark);
+  --color-gold: var(--color-gold);
+  --color-line: var(--color-line);
+  --color-line-dark: var(--color-line-dark);
+
+  --font-display: var(--font-geist-sans);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fade-up: fade-up 0.9s var(--ease-premium) both;
+  --animate-fade-in: fade-in 0.7s ease both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
 
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  letter-spacing: -0.011em;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: white;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+/* Barra de scroll fina y discreta */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-muted);
+}
+
+/* Fila de scroll horizontal (estilo Spotify) sin barra visible */
+.scroll-row {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
 }

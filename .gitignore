@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+public/uploads/*
+!public/uploads/.gitkeep
+
+# scaffolding de skills de IA generada automáticamente por `prisma init`
+# (no forma parte de la app; se regenera con "npx prisma init" si hace falta)
+.agents/
+.windsurf/
+.claude/skills/
+skills-lock.json
+
+# base de datos SQLite local de desarrollo (se sustituye por Postgres en producción)
+*.db
+*.db-journal

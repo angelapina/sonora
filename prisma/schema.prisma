@@ -1,0 +1,224 @@
+// Sonora — esquema de datos
+// SQLite en desarrollo (sin soporte nativo de enums/arrays escalares):
+// los "enum" se modelan como String documentado + validación con zod en la app,
+// y las taxonomías multivalor (tipo de artista, género, instrumento, tipo de evento)
+// se modelan como tablas de referencia + relaciones muchos-a-muchos implícitas,
+// gestionables desde el panel de administración. Migrar a Postgres en producción
+// no debería requerir tocar este modelo.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Usuarios ----------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("CLIENT") // CLIENT | MUSICIAN | ADMIN
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  musicianProfile MusicianProfile?
+  bookingRequests BookingRequest[]
+  favorites       Favorite[]
+  reviews         Review[]
+  messages        Message[]
+
+  @@index([role])
+}
+
+// ---------- Perfil de músico ----------
+
+model MusicianProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  slug            String    @unique
+  stageName       String
+  tagline         String? // frase corta bajo el nombre
+  avatarUrl       String?
+  coverUrl        String?
+  city            String
+  zone            String? // zona/comarca donde también se desplaza
+  bio             String?
+  priceFrom       Int? // euros, precio orientativo "desde"
+  priceNote       String? // texto libre p.ej. "Según duración y desplazamiento"
+  yearsExperience Int?
+  website         String?
+  instagram       String?
+  youtube         String?
+  tiktok          String?
+  spotify         String?
+  phone           String?
+  contactEmail    String?
+  status          String    @default("draft") // draft | published
+  featured        Boolean   @default(false)
+  featuredUntil   DateTime?
+  plan            String    @default("free") // free | premium
+  ratingAvg       Float     @default(0)
+  ratingCount     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  artistTypes  ArtistType[]  @relation("MusicianArtistTypes")
+  genres       Genre[]       @relation("MusicianGenres")
+  eventTypes   EventType[]   @relation("MusicianEventTypes")
+  instruments  Instrument[]  @relation("MusicianInstruments")
+
+  media           Media[]
+  availability    AvailabilityBlock[]
+  bookingRequests BookingRequest[]
+  reviews         Review[]
+  favoritedBy     Favorite[]
+
+  @@index([city])
+  @@index([status])
+  @@index([featured])
+}
+
+// ---------- Taxonomías (gestionables desde /admin) ----------
+
+model ArtistType {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  label     String
+  icon      String?
+  order     Int               @default(0)
+  musicians MusicianProfile[] @relation("MusicianArtistTypes")
+}
+
+model Genre {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  label     String
+  order     Int               @default(0)
+  musicians MusicianProfile[] @relation("MusicianGenres")
+}
+
+model EventType {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  label     String
+  icon      String?
+  order     Int               @default(0)
+  musicians MusicianProfile[] @relation("MusicianEventTypes")
+}
+
+model Instrument {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  label     String
+  musicians MusicianProfile[] @relation("MusicianInstruments")
+}
+
+// ---------- Multimedia ----------
+
+model Media {
+  id         String          @id @default(cuid())
+  musicianId String
+  musician   MusicianProfile @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  type       String // photo | video | audio
+  url        String
+  provider   String? // youtube | vimeo | upload
+  title      String?
+  order      Int             @default(0)
+  createdAt  DateTime        @default(now())
+
+  @@index([musicianId, type])
+}
+
+// ---------- Disponibilidad ----------
+
+model AvailabilityBlock {
+  id         String          @id @default(cuid())
+  musicianId String
+  musician   MusicianProfile @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  date       DateTime
+  available  Boolean         @default(false) // false = fecha bloqueada/no disponible
+
+  @@unique([musicianId, date])
+}
+
+// ---------- Solicitudes de presupuesto ----------
+
+model BookingRequest {
+  id           String          @id @default(cuid())
+  musicianId   String
+  musician     MusicianProfile @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  clientUserId String?
+  clientUser   User?           @relation(fields: [clientUserId], references: [id])
+  guestName    String
+  guestEmail   String
+  guestPhone   String?
+  eventType    String
+  eventDate    DateTime?
+  city         String?
+  budgetMin    Int?
+  budgetMax    Int?
+  message      String?
+  status       String          @default("pending") // pending | accepted | declined | completed
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  messages Message[]
+  review   Review?
+
+  @@index([musicianId, status])
+  @@index([clientUserId])
+}
+
+model Message {
+  id               String         @id @default(cuid())
+  bookingRequestId String
+  bookingRequest   BookingRequest @relation(fields: [bookingRequestId], references: [id], onDelete: Cascade)
+  senderId         String?
+  sender           User?          @relation(fields: [senderId], references: [id])
+  senderRole       String // client | musician
+  body             String
+  createdAt        DateTime       @default(now())
+
+  @@index([bookingRequestId])
+}
+
+// ---------- Reseñas ----------
+
+model Review {
+  id               String          @id @default(cuid())
+  musicianId       String
+  musician         MusicianProfile @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  bookingRequestId String?         @unique
+  bookingRequest   BookingRequest? @relation(fields: [bookingRequestId], references: [id])
+  authorUserId     String?
+  authorUser       User?           @relation(fields: [authorUserId], references: [id])
+  authorName       String
+  eventType        String?
+  rating           Int
+  comment          String?
+  approved         Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+
+  @@index([musicianId, approved])
+}
+
+// ---------- Favoritos ----------
+
+model Favorite {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  musicianId String
+  musician   MusicianProfile @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+
+  @@unique([userId, musicianId])
+}
