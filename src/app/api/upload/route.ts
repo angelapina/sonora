@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { mkdir, writeFile } from "node:fs/promises";
+import { put } from "@vercel/blob";
 import path from "node:path";
 
 const MAX_SIZE = 15 * 1024 * 1024; // 15MB
@@ -26,11 +26,13 @@ export async function POST(request: Request) {
 
   const ext = path.extname(file.name) || "";
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads", session.user.id);
-  await mkdir(uploadDir, { recursive: true });
+  const pathname = `${session.user.id}/${safeName}`;
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, safeName), buffer);
+  const blob = await put(pathname, file, {
+    access: "public",
+    addRandomSuffix: false,
+    contentType: file.type,
+  });
 
-  return NextResponse.json({ url: `/uploads/${session.user.id}/${safeName}` });
+  return NextResponse.json({ url: blob.url });
 }
