@@ -1,17 +1,16 @@
-// Sonora — esquema de datos
-// SQLite en desarrollo (sin soporte nativo de enums/arrays escalares):
-// los "enum" se modelan como String documentado + validación con zod en la app,
-// y las taxonomías multivalor (tipo de artista, género, instrumento, tipo de evento)
+// Sonora — esquema de datos (Prisma Postgres)
+// Los "enum" se modelan como String documentado + validación con zod en la app
+// (así el modelo es portable entre proveedores sin tocar migraciones), y las
+// taxonomías multivalor (tipo de artista, género, instrumento, tipo de evento)
 // se modelan como tablas de referencia + relaciones muchos-a-muchos implícitas,
-// gestionables desde el panel de administración. Migrar a Postgres en producción
-// no debería requerir tocar este modelo.
+// gestionables desde el panel de administración.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
