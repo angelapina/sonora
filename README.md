@@ -171,3 +171,5 @@ narrativa (sección pinned con crossfade de fotos grandes, reveals progresivos a
 entrar en viewport) y las listas de músicos usan filas de scroll horizontal al estilo
 Spotify en vez de rejillas estáticas. Todo construido con Tailwind + componentes
 propios en `src/components`, sin dependencia de una librería de UI de terceros.
+
+<!-- auto-deploy verificado -->
