@@ -5,6 +5,8 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { BookingActions } from "@/components/booking-actions";
 import { MessageThread } from "@/components/message-thread";
+import { ArtistPayoutBreakdown } from "@/components/price-breakdown";
+import { PAYMENT_STATUSES, type PaymentStatus } from "@/lib/pricing";
 
 export default async function BookingDetailPage({
   params,
@@ -74,7 +76,22 @@ export default async function BookingDetailPage({
           </div>
         </div>
 
-        <BookingActions bookingId={booking.id} status={booking.status} />
+        {booking.agreedPrice ? (
+          <div>
+            <p className="mb-2 text-[13px] font-medium text-ink">Tu liquidación</p>
+            <ArtistPayoutBreakdown basePrice={booking.agreedPrice} />
+            <p className="mt-2 text-[12px] text-ink-muted">
+              {PAYMENT_STATUSES[booking.paymentStatus as PaymentStatus] ??
+                booking.paymentStatus}
+            </p>
+          </div>
+        ) : null}
+
+        <BookingActions
+          bookingId={booking.id}
+          status={booking.status}
+          suggestedPrice={booking.agreedPrice ?? booking.budgetMax ?? booking.budgetMin}
+        />
       </aside>
     </div>
   );

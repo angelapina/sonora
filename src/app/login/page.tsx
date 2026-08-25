@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { LoginForm } from "@/components/login-form";
 
-export const metadata: Metadata = { title: "Iniciar sesión | Sonora" };
+export const metadata: Metadata = { title: "Iniciar sesión" };
 
 export default async function LoginPage({
   searchParams,

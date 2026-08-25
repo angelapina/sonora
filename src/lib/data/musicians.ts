@@ -14,12 +14,16 @@ export const musicianCardSelect = {
   ratingCount: true,
   featured: true,
   plan: true,
+  verified: true,
+  respondsFast: true,
+  gigsCount: true,
+  membersCount: true,
   artistTypes: { select: { slug: true, label: true, icon: true } },
   genres: { select: { slug: true, label: true } },
   media: {
-    where: { type: "video" },
-    take: 1,
-    select: { url: true, provider: true },
+    where: { OR: [{ type: "video" }, { type: "audio" }] },
+    orderBy: { order: "asc" },
+    select: { type: true, url: true, provider: true, title: true },
   },
 } satisfies Prisma.MusicianProfileSelect;
 
@@ -83,7 +87,15 @@ export type MusicianSearchFilters = {
   genres?: string[];
   priceMin?: number;
   priceMax?: number;
-  sort?: "relevance" | "price_asc" | "price_desc" | "rating";
+  /** ISO yyyy-mm-dd. Excluye artistas con la fecha bloqueada. */
+  date?: string;
+  /** Valoración mínima (p.ej. 4.5). */
+  minRating?: number;
+  /** Solo artistas verificados por Sonora. */
+  verifiedOnly?: boolean;
+  /** Solo artistas que traen su propio equipo de sonido. */
+  equipmentOnly?: boolean;
+  sort?: "relevance" | "price_asc" | "price_desc" | "rating" | "experience";
   page?: number;
   perPage?: number;
 };
@@ -97,10 +109,24 @@ export async function searchMusicians(filters: MusicianSearchFilters) {
     genres,
     priceMin,
     priceMax,
+    date,
+    minRating,
+    verifiedOnly,
+    equipmentOnly,
     sort = "relevance",
     page = 1,
     perPage = 12,
   } = filters;
+
+  // Fecha: descartamos a quien la tenga marcada como no disponible.
+  const dateFilter = (() => {
+    if (!date) return {};
+    const day = new Date(`${date}T00:00:00.000Z`);
+    if (Number.isNaN(day.getTime())) return {};
+    return {
+      availability: { none: { date: day, available: false } },
+    } satisfies Prisma.MusicianProfileWhereInput;
+  })();
 
   const where: Prisma.MusicianProfileWhereInput = {
     status: "published",
@@ -112,6 +138,10 @@ export async function searchMusicians(filters: MusicianSearchFilters) {
     ...(genres && genres.length ? { genres: { some: { slug: { in: genres } } } } : {}),
     ...(priceMin !== undefined ? { priceFrom: { gte: priceMin } } : {}),
     ...(priceMax !== undefined ? { priceFrom: { lte: priceMax } } : {}),
+    ...(minRating !== undefined ? { ratingAvg: { gte: minRating } } : {}),
+    ...(verifiedOnly ? { verified: true } : {}),
+    ...(equipmentOnly ? { equipmentIncluded: true } : {}),
+    ...dateFilter,
     ...(q
       ? {
           OR: [
@@ -132,7 +162,10 @@ export async function searchMusicians(filters: MusicianSearchFilters) {
         ? [{ priceFrom: "desc" }]
         : sort === "rating"
           ? [{ ratingAvg: "desc" }]
-          : [{ featured: "desc" }, { ratingAvg: "desc" }];
+          : sort === "experience"
+            ? [{ gigsCount: "desc" }]
+            : // Relevancia: destacados primero, luego verificados y mejor valorados.
+              [{ featured: "desc" }, { verified: "desc" }, { ratingAvg: "desc" }];
 
   const [items, total] = await Promise.all([
     prisma.musicianProfile.findMany({
@@ -163,12 +196,37 @@ export async function getMusicianBySlug(slug: string) {
       },
       reviews: {
         where: { approved: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ verifiedBooking: "desc" }, { createdAt: "desc" }],
       },
+      packages: { orderBy: { order: "asc" } },
     },
   });
 }
 
 export async function getMusicianByUserId(userId: string) {
   return prisma.musicianProfile.findUnique({ where: { userId } });
+}
+
+/**
+ * Reseñas destacadas para la home: solo aprobadas, con comentario y de
+ * contrataciones verificadas a través de Sonora (prueba social real, no relleno).
+ */
+export async function getShowcaseReviews(limit = 3) {
+  return prisma.review.findMany({
+    where: {
+      approved: true,
+      verifiedBooking: true,
+      comment: { not: null },
+    },
+    orderBy: [{ rating: "desc" }, { createdAt: "desc" }],
+    take: limit,
+    select: {
+      id: true,
+      authorName: true,
+      comment: true,
+      rating: true,
+      eventType: true,
+      musician: { select: { stageName: true, slug: true, city: true, avatarUrl: true } },
+    },
+  });
 }

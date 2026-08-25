@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { SlidersHorizontal, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { SearchFilters } from "@/components/search-filters";
+import { FilterSheet } from "@/components/filter-sheet";
+import { Container } from "@/components/ui/layout";
 import { SortSelect } from "@/components/sort-select";
 import { MusicianCard } from "@/components/musician-card";
 import { getArtistTypes, getGenres, getEventTypes } from "@/lib/data/taxonomy";
 import { searchMusicians, type MusicianSearchFilters } from "@/lib/data/musicians";
 
 export const metadata: Metadata = {
-  title: "Buscar músicos y artistas | Sonora",
+  title: "Buscar músicos y artistas",
 };
 
 function toArray(v: string | string[] | undefined): string[] {
@@ -50,6 +52,10 @@ export default async function SearchPage({
     genres: toArray(sp.genre),
     priceMin: toStr(sp.priceMin) ? Number(toStr(sp.priceMin)) : undefined,
     priceMax: toStr(sp.priceMax) ? Number(toStr(sp.priceMax)) : undefined,
+    date: toStr(sp.date),
+    minRating: toStr(sp.minRating) ? Number(toStr(sp.minRating)) : undefined,
+    verifiedOnly: toStr(sp.verifiedOnly) === "1",
+    equipmentOnly: toStr(sp.equipmentOnly) === "1",
     sort: (toStr(sp.sort) as MusicianSearchFilters["sort"]) ?? "relevance",
     page: toStr(sp.page) ? Number(toStr(sp.page)) : 1,
   };
@@ -68,16 +74,20 @@ export default async function SearchPage({
     (filters.eventType ? 1 : 0) +
     (filters.priceMin !== undefined ? 1 : 0) +
     (filters.priceMax !== undefined ? 1 : 0) +
+    (filters.date ? 1 : 0) +
+    (filters.minRating !== undefined ? 1 : 0) +
+    (filters.verifiedOnly ? 1 : 0) +
+    (filters.equipmentOnly ? 1 : 0) +
     (filters.artistTypes?.length ?? 0) +
     (filters.genres?.length ?? 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12">
-      <div className="mb-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral">
+    <Container size="wide" className="section-tight">
+      <div className="mb-[clamp(1.75rem,1.2rem+2vw,2.5rem)]">
+        <p className="t-eyebrow text-coral">
           {results.total} {results.total === 1 ? "músico encontrado" : "músicos encontrados"}
         </p>
-        <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
+        <h1 className="t-h1 mt-2 text-ink">
           {filters.city
             ? `Músicos en ${filters.city}`
             : activeEventTypeLabel
@@ -88,36 +98,27 @@ export default async function SearchPage({
 
       <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
         <aside className="lg:sticky lg:top-24 lg:h-fit">
-          {/* Móvil/tablet: acordeón cerrado por defecto para llegar antes a los resultados */}
-          <details className="group rounded-2xl border border-line bg-paper p-5 lg:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-ink">
-              <span className="flex items-center gap-2">
-                <SlidersHorizontal size={16} /> Filtros
-                {activeFilterCount > 0 && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-coral text-[11px] font-semibold text-white">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </span>
-              <span className="text-ink-muted transition-transform duration-300 group-open:rotate-180">⌄</span>
-            </summary>
-            <div className="mt-6">
-              <SearchFilters
-                artistTypes={artistTypes}
-                genres={genres}
-                eventTypes={eventTypes}
-                current={{
-                  q: filters.q,
-                  city: filters.city,
-                  eventType: filters.eventType,
-                  artistType: filters.artistTypes ?? [],
-                  genre: filters.genres ?? [],
-                  priceMin: toStr(sp.priceMin),
-                  priceMax: toStr(sp.priceMax),
-                }}
-              />
-            </div>
-          </details>
+          {/* Móvil: hoja inferior, para no empujar los resultados */}
+          <FilterSheet activeCount={activeFilterCount}>
+            <SearchFilters
+              artistTypes={artistTypes}
+              genres={genres}
+              eventTypes={eventTypes}
+              current={{
+                q: filters.q,
+                city: filters.city,
+                eventType: filters.eventType,
+                artistType: filters.artistTypes ?? [],
+                genre: filters.genres ?? [],
+                priceMin: toStr(sp.priceMin),
+                priceMax: toStr(sp.priceMax),
+                date: filters.date,
+                minRating: toStr(sp.minRating),
+                verifiedOnly: filters.verifiedOnly,
+                equipmentOnly: filters.equipmentOnly,
+              }}
+            />
+          </FilterSheet>
 
           {/* Escritorio: filtros siempre visibles en la barra lateral */}
           <div className="hidden lg:block">
@@ -133,6 +134,10 @@ export default async function SearchPage({
                 genre: filters.genres ?? [],
                 priceMin: toStr(sp.priceMin),
                 priceMax: toStr(sp.priceMax),
+                date: filters.date,
+                minRating: toStr(sp.minRating),
+                verifiedOnly: filters.verifiedOnly,
+                equipmentOnly: filters.equipmentOnly,
               }}
             />
           </div>
@@ -144,18 +149,18 @@ export default async function SearchPage({
           </div>
 
           {results.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line py-24 text-center">
-              <SearchX size={32} className="text-ink-muted" />
-              <p className="mt-4 font-display text-xl text-ink">
+            <div className="flex flex-col items-center justify-center rounded-[var(--radius-panel)] border border-dashed border-line px-6 py-20 text-center">
+              <SearchX size={30} className="text-ink-subtle" />
+              <p className="t-h3 mt-5 text-ink">
                 No hemos encontrado músicos con esos filtros
               </p>
-              <p className="mt-2 max-w-sm text-sm text-ink-muted">
+              <p className="t-body mt-2 max-w-sm text-ink-muted">
                 Prueba a ampliar la búsqueda: elimina algún filtro o cambia la ciudad y el
                 tipo de evento.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-6 xl:grid-cols-3">
               {results.items.map((m) => (
                 <MusicianCard key={m.id} musician={m} />
               ))}
@@ -168,9 +173,9 @@ export default async function SearchPage({
                 <a
                   key={p}
                   href={buildQuery(sp, { page: p })}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                  className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                     p === filters.page
-                      ? "bg-ink text-cream"
+                      ? "bg-ink text-white"
                       : "border border-line text-ink-soft hover:border-ink/30"
                   }`}
                 >
@@ -181,6 +186,6 @@ export default async function SearchPage({
           )}
         </div>
       </div>
-    </div>
+    </Container>
   );
 }

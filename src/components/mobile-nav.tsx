@@ -50,14 +50,20 @@ export function MobileNav({
             <Link href="/buscar" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
               Buscar músicos
             </Link>
-            <Link href="/buscar?eventType=boda" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
-              Bodas
+            <Link href="/musica-para/bodas" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
+              Música para bodas
             </Link>
-            <Link href="/buscar?eventType=corporativo" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
+            <Link href="/musica-para/eventos-corporativos" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
               Eventos de empresa
             </Link>
-            <Link href="/registro/musico" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
-              Soy músico
+            <Link href="/match" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
+              Encuentra tu match
+            </Link>
+            <Link href="/como-funciona" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
+              Cómo funciona
+            </Link>
+            <Link href="/para-musicos" onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink hover:bg-ink/5">
+              Para músicos
             </Link>
             <div className="my-2 border-t border-line" />
             {isLoggedIn ? (
@@ -83,7 +89,7 @@ export function MobileNav({
       <button
         onClick={() => setOpen(true)}
         aria-label="Abrir menú"
-        className="flex h-9 w-9 items-center justify-center text-ink"
+        className="flex h-11 w-11 items-center justify-center text-white"
       >
         <Menu size={22} />
       </button>

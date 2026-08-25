@@ -7,25 +7,31 @@ import { MobileNav } from "@/components/mobile-nav";
 export async function SiteHeader() {
   const session = await auth();
 
+  // Cabecera oscura y sin borde inferior: sobre el hero negro se funde con él
+  // (antes el borde claro dibujaba una línea blanca muy visible), y en las
+  // páginas de fondo blanco actúa como barra de contraste.
   return (
-    <header className="sticky top-0 z-40 border-b border-line/60 bg-cream/75 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+    <header className="sticky top-0 z-40 bg-ink/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 sm:px-6 lg:px-10">
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-display text-[19px] font-semibold tracking-tight text-ink">Sonora</span>
+          <span className="text-[19px] font-semibold tracking-[-0.02em] text-white">Sonora</span>
         </Link>
 
-        <nav className="hidden items-center gap-8 text-[13px] font-medium text-ink-muted md:flex">
-          <Link href="/buscar" className="transition-colors hover:text-ink">
+        <nav className="hidden items-center gap-7 text-[13.5px] font-medium text-white/60 md:flex">
+          <Link href="/buscar" className="transition-colors hover:text-white">
             Buscar músicos
           </Link>
-          <Link href="/buscar?eventType=boda" className="transition-colors hover:text-ink">
+          <Link href="/musica-para/bodas" className="transition-colors hover:text-white">
             Bodas
           </Link>
-          <Link href="/buscar?eventType=corporativo" className="transition-colors hover:text-ink">
-            Eventos de empresa
+          <Link href="/musica-para/eventos-corporativos" className="transition-colors hover:text-white">
+            Empresas
           </Link>
-          <Link href="/registro/musico" className="transition-colors hover:text-ink">
-            Soy músico
+          <Link href="/como-funciona" className="transition-colors hover:text-white">
+            Cómo funciona
+          </Link>
+          <Link href="/para-musicos" className="transition-colors hover:text-white">
+            Para músicos
           </Link>
         </nav>
 
@@ -35,7 +41,7 @@ export async function SiteHeader() {
               {session.user.role === "CLIENT" && (
                 <Link
                   href="/cuenta/favoritos"
-                  className="hidden items-center gap-1.5 text-sm font-medium text-ink-soft transition-colors hover:text-ink sm:flex"
+                  className="hidden items-center gap-1.5 text-[13px] font-medium text-white/65 transition-colors hover:text-white sm:flex"
                 >
                   <Heart size={16} /> Favoritos
                 </Link>
@@ -43,7 +49,7 @@ export async function SiteHeader() {
               {(session.user.role === "MUSICIAN" || session.user.role === "ADMIN") && (
                 <Link
                   href={session.user.role === "ADMIN" ? "/admin" : "/dashboard"}
-                  className="hidden items-center gap-1.5 text-sm font-medium text-ink-soft transition-colors hover:text-ink sm:flex"
+                  className="hidden items-center gap-1.5 text-[13px] font-medium text-white/65 transition-colors hover:text-white sm:flex"
                 >
                   <LayoutDashboard size={16} />
                   {session.user.role === "ADMIN" ? "Panel admin" : "Mi dashboard"}
@@ -57,7 +63,7 @@ export async function SiteHeader() {
               >
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
+                  className="flex items-center gap-1.5 text-[13px] font-medium text-white/65 transition-colors hover:text-white"
                 >
                   <LogOut size={16} />
                   <span className="hidden sm:inline">Salir</span>
@@ -68,7 +74,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/login"
-                className="hidden text-sm font-medium text-ink-soft transition-colors hover:text-ink sm:block"
+                className="hidden text-[13px] font-medium text-white/65 transition-colors hover:text-white sm:block"
               >
                 Iniciar sesión
               </Link>

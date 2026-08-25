@@ -1,11 +1,14 @@
 import Link from "next/link";
 
 export function SiteFooter() {
+  // El colchón para la barra de navegación móvil (pb-16) vive aquí, no en
+  // <main>: puesto en main pintaba una franja blanca entre el CTA oscuro y el
+  // pie oscuro. En el footer, ese hueco tiene el mismo color que el bloque.
   return (
-    <footer className="mt-32 bg-ink text-cream/55">
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="bg-ink pb-16 text-cream/55 lg:pb-0">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 pt-14 pb-12 sm:grid-cols-2 sm:gap-12 sm:px-6 lg:grid-cols-4 lg:px-10">
         <div>
-          <p className="font-display text-xl font-semibold text-cream">Sonora</p>
+          <p className="text-[19px] font-semibold tracking-[-0.02em] text-white">Sonora</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed">
             El marketplace para descubrir y contratar músicos y artistas para tu boda,
             evento o celebración.
@@ -39,7 +42,7 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/[0.08] px-6 py-7 text-center text-xs text-cream/30">
+      <div className="border-t border-white/[0.08] px-5 py-7 text-center text-xs text-white/30 sm:px-6">
         © {new Date().getFullYear()} Sonora. Proyecto MVP de demostración.
       </div>
     </footer>

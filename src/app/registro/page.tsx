@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Music4, User } from "lucide-react";
 
-export const metadata: Metadata = { title: "Crear cuenta | Sonora" };
+export const metadata: Metadata = { title: "Crear cuenta" };
 
 export default function RegisterChoicePage() {
   return (

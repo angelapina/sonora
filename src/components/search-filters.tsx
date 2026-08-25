@@ -1,6 +1,6 @@
-import { CITIES } from "@/lib/taxonomy-data";
+import { CITIES, ARTIST_KINDS } from "@/lib/taxonomy-data";
 
-type Taxonomy = { slug: string; label: string; icon?: string | null }[];
+type Taxonomy = { slug: string; label: string; icon?: string | null; kind?: string }[];
 
 export function SearchFilters({
   artistTypes,
@@ -19,10 +19,37 @@ export function SearchFilters({
     genre: string[];
     priceMin?: string;
     priceMax?: string;
+    date?: string;
+    minRating?: string;
+    verifiedOnly?: boolean;
+    equipmentOnly?: boolean;
   };
 }) {
   return (
     <form method="GET" action="/buscar" className="space-y-7">
+      {/* Aplicar va arriba y pegado, no al final.
+          El formulario es largo: con el botón abajo había que recorrer todos
+          los filtros para confirmar, y en la hoja del móvil eso significaba
+          perder de vista lo que acababas de marcar. Al ser `sticky` dentro del
+          contenedor con scroll, la acción sigue a la vista mientras filtras.
+          El fondo cambia de contexto: la hoja del móvil es blanca y el panel de
+          escritorio va sobre el crema de la página. Los márgenes negativos
+          compensan el `px-5` de la hoja para que la barra tape todo el ancho y
+          no se vea el contenido colarse por los lados. */}
+      <div className="sticky top-0 z-10 -mx-5 flex gap-3 border-b border-line bg-white px-5 pb-4 pt-1 lg:mx-0 lg:border-none lg:bg-cream lg:px-0 lg:pb-0 lg:pt-0">
+        <button
+          type="submit"
+          className="flex-1 rounded-full bg-coral px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+        >
+          Aplicar filtros
+        </button>
+        <a
+          href="/buscar"
+          className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink-soft transition-colors hover:border-ink/30"
+        >
+          Limpiar
+        </a>
+      </div>
       <div>
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
           Buscar
@@ -97,28 +124,95 @@ export function SearchFilters({
         </div>
       </div>
 
+      <div>
+        <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          Fecha del evento
+        </label>
+        <input
+          type="date"
+          name="date"
+          defaultValue={current.date}
+          className="w-full rounded-xl border border-line bg-paper px-4 py-2.5 text-sm outline-none focus:border-coral"
+        />
+        <p className="mt-1.5 text-[12px] text-ink-muted">
+          Solo verás artistas con esa fecha libre.
+        </p>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          Valoración mínima
+        </label>
+        <select
+          name="minRating"
+          defaultValue={current.minRating ?? ""}
+          className="w-full rounded-xl border border-line bg-paper px-4 py-2.5 text-sm outline-none focus:border-coral"
+        >
+          <option value="">Cualquier valoración</option>
+          <option value="4.8">4,8 o más</option>
+          <option value="4.5">4,5 o más</option>
+          <option value="4">4 o más</option>
+        </select>
+      </div>
+
       <fieldset>
         <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-          Tipo de artista
+          Confianza y servicios
         </legend>
-        <div className="flex flex-wrap gap-2">
-          {artistTypes.map((t) => (
-            <label
-              key={t.slug}
-              className="flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-medium has-[:checked]:border-coral has-[:checked]:bg-coral/10 has-[:checked]:text-coral-dark"
-            >
-              <input
-                type="checkbox"
-                name="artistType"
-                value={t.slug}
-                defaultChecked={current.artistType.includes(t.slug)}
-                className="sr-only"
-              />
-              {t.icon} {t.label}
-            </label>
-          ))}
+        <div className="space-y-2">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-ink">
+            <input
+              type="checkbox"
+              name="verifiedOnly"
+              value="1"
+              defaultChecked={current.verifiedOnly}
+              className="h-4 w-4 rounded border-line accent-coral"
+            />
+            Solo artistas verificados
+          </label>
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-ink">
+            <input
+              type="checkbox"
+              name="equipmentOnly"
+              value="1"
+              defaultChecked={current.equipmentOnly}
+              className="h-4 w-4 rounded border-line accent-coral"
+            />
+            Trae su propio equipo de sonido
+          </label>
         </div>
       </fieldset>
+
+      {/* Los tipos van agrupados por disciplina: mezclar "Pianista" con
+          "Espectáculo de fuego" en una sola lista obliga a leerla entera. */}
+      {ARTIST_KINDS.map((kind) => {
+        const types = artistTypes.filter((t) => (t.kind ?? "musico") === kind.kind);
+        if (types.length === 0) return null;
+        return (
+          <fieldset key={kind.kind}>
+            <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+              {kind.label}
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {types.map((t) => (
+                <label
+                  key={t.slug}
+                  className="flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-medium has-[:checked]:border-coral has-[:checked]:bg-coral/10 has-[:checked]:text-coral-dark"
+                >
+                  <input
+                    type="checkbox"
+                    name="artistType"
+                    value={t.slug}
+                    defaultChecked={current.artistType.includes(t.slug)}
+                    className="sr-only"
+                  />
+                  {t.icon} {t.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        );
+      })}
 
       <fieldset>
         <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
@@ -143,20 +237,6 @@ export function SearchFilters({
         </div>
       </fieldset>
 
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          className="flex-1 rounded-full bg-coral px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
-        >
-          Aplicar filtros
-        </button>
-        <a
-          href="/buscar"
-          className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink-soft transition-colors hover:border-ink/30"
-        >
-          Limpiar
-        </a>
-      </div>
     </form>
   );
 }

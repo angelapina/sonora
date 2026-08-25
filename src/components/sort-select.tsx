@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 const OPTIONS = [
   { value: "relevance", label: "Relevancia" },
   { value: "rating", label: "Mejor valorados" },
+  { value: "experience", label: "Más actuaciones" },
   { value: "price_asc", label: "Precio: menor a mayor" },
   { value: "price_desc", label: "Precio: mayor a menor" },
 ];

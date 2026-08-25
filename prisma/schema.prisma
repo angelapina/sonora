@@ -66,6 +66,24 @@ model MusicianProfile {
   plan            String    @default("free") // free | premium
   ratingAvg       Float     @default(0)
   ratingCount     Int       @default(0)
+
+  // --- Señales de confianza (marketplace) ---
+  verified        Boolean   @default(false) // identidad + perfil revisados por Sonora
+  respondsFast    Boolean   @default(false) // responde en <24h de media
+  gigsCount       Int       @default(0)     // nº de actuaciones declaradas/verificadas
+  // --- Detalles que el cliente pregunta antes de contratar ---
+  minDurationMin  Int? // duración mínima de la actuación, en minutos
+  membersCount    Int? // nº de músicos que suben al escenario
+  travelRadiusKm  Int? // hasta dónde se desplaza desde su ciudad
+  equipmentIncluded Boolean @default(false) // sonido/luces propios incluidos
+  languages       String? // CSV de idiomas del repertorio, p.ej. "es,en,it"
+  formats         String? // CSV: "acustico,electrico"
+  venueTypes      String? // CSV: "interior,exterior"
+  repertoire      String? // temas/estilos destacados, texto libre
+  influences      String? // referencias musicales, texto libre
+  /// Política de cancelación que el artista aplica por defecto.
+  cancellationPolicy String @default("moderada")
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -79,21 +97,48 @@ model MusicianProfile {
   bookingRequests BookingRequest[]
   reviews         Review[]
   favoritedBy     Favorite[]
+  packages        PricingPackage[]
 
   @@index([city])
   @@index([status])
   @@index([featured])
+  @@index([verified])
+}
+
+/// Paquetes de precio configurables por el músico (Pack Ceremonia, Pack Cóctel…).
+/// Hacen el precio transparente sin comprometer al artista a una tarifa cerrada:
+/// `priceFrom` del perfil sigue siendo el "desde" global.
+model PricingPackage {
+  id          String          @id @default(cuid())
+  musicianId  String
+  musician    MusicianProfile @relation(fields: [musicianId], references: [id], onDelete: Cascade)
+  name        String // "Pack Ceremonia"
+  description String?
+  price       Int // euros
+  durationMin Int? // duración incluida, en minutos
+  includes    String? // CSV de lo que incluye, una línea por elemento
+  order       Int             @default(0)
+
+  @@index([musicianId])
 }
 
 // ---------- Taxonomías (gestionables desde /admin) ----------
 
 model ArtistType {
-  id        String            @id @default(cuid())
-  slug      String            @unique
-  label     String
-  icon      String?
-  order     Int               @default(0)
+  id    String @id @default(cuid())
+  slug  String @unique
+  label String
+  icon  String?
+  order Int    @default(0)
+
+  /// Disciplina: "musico" (cantantes, bandas, DJs…) o "escenico" (baile, magia,
+  /// humor, circo…). Son dos mercados con búsqueda, precio y expectativas
+  /// distintas, así que se navegan y se filtran por separado.
+  kind String @default("musico")
+
   musicians MusicianProfile[] @relation("MusicianArtistTypes")
+
+  @@index([kind])
 }
 
 model Genre {
@@ -166,6 +211,21 @@ model BookingRequest {
   budgetMax    Int?
   message      String?
   status       String          @default("pending") // pending | accepted | declined | completed
+
+  // --- Facturación (comisión partida, ver src/lib/pricing.ts) ---
+  /// Precio acordado con el artista, sin comisiones. Se fija al aceptar.
+  agreedPrice      Int?
+  /// Importes congelados en el momento de aceptar: si mañana cambian las
+  /// tarifas de la plataforma, esta reserva mantiene las condiciones pactadas.
+  clientFee        Int?
+  clientTotal      Int?
+  artistCommission Int?
+  artistPayout     Int?
+  paymentStatus    String    @default("none") // ver PAYMENT_STATUSES
+  cancellationPolicy String  @default("moderada")
+  /// Momento en que el dinero deja de estar en custodia y se liquida.
+  payoutReleaseAt  DateTime?
+
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
@@ -201,9 +261,22 @@ model Review {
   authorUser       User?           @relation(fields: [authorUserId], references: [id])
   authorName       String
   eventType        String?
-  rating           Int
+  rating           Int // valoración global 1-5 (la que se muestra en tarjetas)
   comment          String?
   approved         Boolean         @default(false)
+
+  // Sub-puntuaciones opcionales: dan contexto real sobre por qué la nota global
+  // es la que es, y permiten mostrar desgloses en el perfil.
+  ratingMusic          Int? // calidad musical
+  ratingProfessionalism Int?
+  ratingPunctuality    Int?
+  ratingCommunication  Int?
+  ratingValue          Int? // relación calidad/precio
+
+  /// true cuando la reseña procede de una BookingRequest completada en Sonora.
+  /// Es la diferencia entre "una opinión" y "una contratación verificada".
+  verifiedBooking  Boolean         @default(false)
+
   createdAt        DateTime        @default(now())
 
   @@index([musicianId, approved])

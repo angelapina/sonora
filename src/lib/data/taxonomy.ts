@@ -5,6 +5,11 @@ export async function getArtistTypes() {
   return prisma.artistType.findMany({ orderBy: { order: "asc" } });
 }
 
+/** Tipos de una sola disciplina: "musico" o "escenico". */
+export async function getArtistTypesByKind(kind: "musico" | "escenico") {
+  return prisma.artistType.findMany({ where: { kind }, orderBy: { order: "asc" } });
+}
+
 export async function getGenres() {
   return prisma.genre.findMany({ orderBy: { order: "asc" } });
 }

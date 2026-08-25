@@ -10,28 +10,52 @@
 ------------------------------------------------------------------- */
 
 :root {
-  --color-ink: #1d1d1f; /* negro Apple: texto principal y fondos oscuros */
-  --color-ink-soft: #2c2c2e; /* variante sobre fondo oscuro */
-  --color-ink-muted: #6e6e73; /* gris secundario Apple */
-  --color-cream: #ffffff; /* fondo base: blanco puro */
-  --color-cream-soft: #f5f5f7; /* gris muy claro Apple, secciones alternas */
-  --color-paper: #ffffff; /* tarjetas */
-  --color-coral: #ff5a3c; /* acento de marca Sonora — único color con personalidad */
+  /* --- Superficies ---
+     Blanco cálido en vez de blanco puro: el #fff clínico endurece la lectura y
+     hace que las fotos "floten". Un off-white con un punto de calidez da la
+     sensación de papel de calidad y hace descansar la vista en sesiones largas. */
+  --color-cream: #fbfaf9;      /* fondo base */
+  --color-cream-soft: #f4f2f0; /* secciones alternas */
+  --color-paper: #ffffff;      /* tarjetas: destacan sobre el fondo cálido */
+
+  /* --- Tinta ---
+     Negro con un punto de azul. El negro plano (#000) sobre pantalla vibra y
+     cansa; desplazarlo hacia el azul lo hace más profundo y más "caro", que es
+     lo que hace Apple con su gris carbón. */
+  --color-ink: #17171c;        /* texto principal y fondos oscuros */
+  --color-ink-soft: #26262e;   /* superficie elevada sobre fondo oscuro */
+  --color-ink-muted: #6b6b76;  /* texto secundario — AA sobre crema */
+  --color-ink-subtle: #9a9aa3; /* metadatos, nunca texto esencial */
+
+  /* --- Acentos ---
+     Uno de acción (coral) y uno de confianza (índigo). El índigo aparece solo
+     en superficies grandes y sellos de verificación: aporta la parte de
+     "seguridad" sin competir con el coral, que es el que pide el clic. */
+  --color-coral: #ff5a3c;
   --color-coral-dark: #e0451f;
-  --color-gold: #b8894a;
-  --color-line: #e5e5ea; /* hairline Apple */
-  --color-line-dark: rgba(255, 255, 255, 0.14);
+  --color-coral-soft: #fff1ed;  /* fondo de avisos y estados */
+  --color-indigo: #2f2a52;      /* superficies oscuras con más carácter que el negro */
+  --color-indigo-soft: #eeecf7; /* fondo de sellos de confianza */
+  --color-gold: #b8894a;        /* solo estrellas de valoración */
+
+  /* --- Líneas --- */
+  --color-line: #e8e5e2;                    /* hairline sobre crema */
+  --color-line-dark: rgba(255, 255, 255, 0.12);
 }
 
 @theme inline {
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);
   --color-ink-muted: var(--color-ink-muted);
+  --color-ink-subtle: var(--color-ink-subtle);
   --color-cream: var(--color-cream);
   --color-cream-soft: var(--color-cream-soft);
   --color-paper: var(--color-paper);
   --color-coral: var(--color-coral);
   --color-coral-dark: var(--color-coral-dark);
+  --color-coral-soft: var(--color-coral-soft);
+  --color-indigo: var(--color-indigo);
+  --color-indigo-soft: var(--color-indigo-soft);
   --color-gold: var(--color-gold);
   --color-line: var(--color-line);
   --color-line-dark: var(--color-line-dark);
@@ -39,6 +63,20 @@
   --font-display: var(--font-geist-sans);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* --- Radios ---
+     Una sola familia de curvas. Antes convivían rounded-2xl, [24px], [28px] y
+     full sin criterio; ahora cada tamaño tiene su sitio. */
+  --radius-card: 20px;    /* tarjetas y campos */
+  --radius-panel: 28px;   /* bloques grandes */
+  --radius-pill: 999px;   /* botones y chips */
+
+  /* --- Sombras ---
+     Muy tenues y siempre en dos capas (contacto + difusa), que es lo que hace
+     que un elemento parezca apoyado y no pegado. */
+  --shadow-subtle: 0 1px 2px rgba(23, 23, 28, 0.04);
+  --shadow-card: 0 1px 2px rgba(23, 23, 28, 0.04), 0 8px 24px -12px rgba(23, 23, 28, 0.12);
+  --shadow-lifted: 0 2px 4px rgba(23, 23, 28, 0.05), 0 20px 48px -20px rgba(23, 23, 28, 0.22);
 
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -62,6 +100,121 @@
     to {
       opacity: 1;
     }
+  }
+
+  /* Instrumentos del hero: deriva lenta y amplia. Dos trayectorias distintas
+     para que las piezas no se muevan en bloque y el conjunto parezca vivo.
+     `--tilt` conserva la inclinación propia de cada pieza. */
+  @keyframes drift-a {
+    0%, 100% {
+      transform: rotate(var(--tilt, 0deg)) translate3d(0, 0, 0);
+    }
+    50% {
+      transform: rotate(calc(var(--tilt, 0deg) + 5deg)) translate3d(14px, -26px, 0);
+    }
+  }
+  @keyframes drift-b {
+    0%, 100% {
+      transform: rotate(var(--tilt, 0deg)) translate3d(0, 0, 0);
+    }
+    50% {
+      transform: rotate(calc(var(--tilt, 0deg) - 6deg)) translate3d(-18px, 22px, 0);
+    }
+  }
+
+  /* Hoja inferior: entra deslizando desde abajo. */
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Las clases de sistema van en la capa `components` para que cualquier
+   utilidad de Tailwind (pt-0, mt-8…) pueda anularlas puntualmente. Sin
+   capa, el CSS suelto gana siempre y los ajustes finos no se aplican. */
+@layer components {
+  /* ------------------------------------------------------------------
+     Escala tipográfica
+     Una clase por rol, no tamaños sueltos. Antes convivían text-[38px],
+     text-[15px], text-[13px]… sin relación entre sí: por eso nada rimaba.
+     Cada paso crece de forma fluida con clamp(), así que no hacen falta
+     cuatro breakpoints por titular y el salto móvil→escritorio es continuo.
+  ------------------------------------------------------------------- */
+  /* El tope (100px) no es estético: es el tamaño máximo con el que "Contrata un
+     artista para tu" todavía entra en una sola línea dentro del hero a 1366px,
+     que es el escritorio más estrecho habitual. Subirlo parte el titular en tres
+     líneas y el bloque deja de leerse a lo largo. */
+  .t-display {
+    font-size: clamp(2.5rem, 1rem + 6.5vw, 6.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+  }
+  .t-h1 {
+    font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.032em;
+    font-weight: 600;
+  }
+  .t-h2 {
+    font-size: clamp(1.5rem, 1.1rem + 1.7vw, 2.25rem);
+    line-height: 1.12;
+    letter-spacing: -0.028em;
+    font-weight: 600;
+  }
+  .t-h3 {
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .t-lead {
+    font-size: clamp(1rem, 0.95rem + 0.5vw, 1.3125rem);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+  .t-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .t-small {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  .t-eyebrow {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  /* ------------------------------------------------------------------
+     Ritmo vertical
+     Tres densidades de sección y un único hueco entre encabezado y
+     contenido. Con esto el espacio entre bloques deja de ser una decisión
+     caso por caso y la página respira igual de arriba abajo.
+  ------------------------------------------------------------------- */
+  /* El espacio se aplica arriba y abajo, así que entre dos secciones seguidas
+     el hueco es el DOBLE de este valor. Con 7.5rem salían 236px de separación
+     en escritorio, demasiado. Calibrado para que el hueco real ronde los
+     176px, que es el rango en el que se mueven las páginas de producto de
+     Apple. */
+  .section {
+    padding-block: clamp(3rem, 1.75rem + 4vw, 5.5rem);
+  }
+  .section-tight {
+    padding-block: clamp(2rem, 1.25rem + 2.5vw, 3.5rem);
+  }
+  .section-gap {
+    /* separación entre bloques dentro de una misma sección */
+    margin-top: clamp(2rem, 1.2rem + 3vw, 3.5rem);
+  }
+  .stack-head {
+    /* del encabezado de sección a su contenido */
+    margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
   }
 }
 
@@ -113,4 +266,12 @@ body {
 }
 .scroll-row::-webkit-scrollbar {
   display: none;
+}
+
+/* La deriva de los instrumentos es puramente decorativa: si el usuario ha
+   pedido reducir el movimiento, se queda quieta sin perder la composición. */
+@media (prefers-reduced-motion: reduce) {
+  .instrument-float {
+    animation: none !important;
+  }
 }

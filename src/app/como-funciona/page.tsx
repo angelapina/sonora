@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ButtonLink } from "@/components/ui/button";
 import { Search, MessagesSquare, ShieldCheck, Music4 } from "lucide-react";
 
-export const metadata: Metadata = { title: "Cómo funciona | Sonora" };
+export const metadata: Metadata = { title: "Cómo funciona" };
 
 const STEPS = [
   {

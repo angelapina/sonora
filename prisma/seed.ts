@@ -53,6 +53,18 @@ type MusicianSeed = {
   yearsExperience: number;
   featured?: boolean;
   plan?: "free" | "premium";
+  // --- campos de marketplace ---
+  verified?: boolean;
+  membersCount?: number;
+  minDurationMin?: number;
+  travelRadiusKm?: number;
+  equipmentIncluded?: boolean;
+  languages?: string;
+  formats?: string;
+  venueTypes?: string;
+  repertoire?: string;
+  influences?: string;
+  packages?: { name: string; description?: string; price: number; durationMin?: number; includes?: string }[];
 };
 
 const MUSICIANS: MusicianSeed[] = [
@@ -295,6 +307,44 @@ const MUSICIANS: MusicianSeed[] = [
     yearsExperience: 5,
   },
   {
+    stageName: "Compañía Aire",
+    city: "Sevilla",
+    tagline: "Baile flamenco que corta la respiración",
+    bio: "Compañía de baile flamenco con bailaora, guitarra y cante. Espectáculos de 30 a 60 minutos pensados para bodas, eventos de empresa y cenas de gala, con tarima propia y vestuario para cada pase.",
+    artistTypes: ["baile-flamenco", "baile"],
+    genres: ["flamenco", "copla"],
+    eventTypes: ["boda", "corporativo", "hotel"],
+    instruments: ["voz", "guitarra"],
+    priceFrom: 800,
+    priceNote: "Según número de artistas y duración del espectáculo",
+    yearsExperience: 12,
+    featured: true,
+  },
+  {
+    stageName: "Nacho Prisma",
+    city: "Madrid",
+    tagline: "Magia de cerca que deja a la gente sin palabras",
+    bio: "Mago especializado en magia de cerca y mentalismo. Recorre las mesas durante el cóctel o el banquete haciendo magia a un palmo de los invitados, y cierra con un pase de escenario de 20 minutos si el evento lo pide.",
+    artistTypes: ["magia"],
+    genres: [],
+    eventTypes: ["boda", "corporativo", "fiesta-privada"],
+    instruments: [],
+    priceFrom: 550,
+    yearsExperience: 9,
+  },
+  {
+    stageName: "Fuego Nómada",
+    city: "Valencia",
+    tagline: "Espectáculo de fuego para cerrar la noche",
+    bio: "Compañía de artes escénicas especializada en espectáculo de fuego y luz LED. Pases de 15 a 25 minutos con coreografía, pensados para el momento del corte de tarta o la entrada a la fiesta. Seguro de responsabilidad civil incluido.",
+    artistTypes: ["fuego", "circo"],
+    genres: ["electronica"],
+    eventTypes: ["boda", "fiesta-privada", "festival"],
+    instruments: [],
+    priceFrom: 700,
+    yearsExperience: 7,
+  },
+  {
     stageName: "Quartet Mediterrani",
     city: "Valencia",
     tagline: "Cuerda y piano con aire mediterráneo",
@@ -305,6 +355,124 @@ const MUSICIANS: MusicianSeed[] = [
     instruments: ["violin", "cello", "piano"],
     priceFrom: 700,
     yearsExperience: 10,
+  },
+];
+
+/**
+ * Detalles de marketplace por músico, en el mismo orden que MUSICIANS.
+ * CONTENIDO DEMO: perfiles ficticios para poblar el MVP; ningún artista, cifra
+ * ni reseña corresponde a personas reales.
+ */
+const MUSICIAN_DETAILS: Partial<MusicianSeed>[] = [
+  { // Marta Vidal
+    verified: true, membersCount: 1, minDurationMin: 60, travelRadiusKm: 200,
+    equipmentIncluded: true, languages: "es,en", formats: "acustico,electrico",
+    venueTypes: "interior,exterior",
+    repertoire: "Del pop actual a los clásicos que todo el mundo se sabe: Adele, Amaral, Norah Jones, Rosalía en versión acústica, y los imprescindibles de los 80 para el final de fiesta.",
+    influences: "Adele, Amy Winehouse, Vanesa Martín",
+    packages: [
+      { name: "Ceremonia", description: "Entrada, firma y salida con acompañamiento acústico.", price: 450, durationMin: 60, includes: "Voz y guitarra\nEquipo de sonido\nReunión previa para elegir temas" },
+      { name: "Ceremonia + cóctel", description: "El momento clave y el ambiente del aperitivo.", price: 700, durationMin: 150, includes: "Voz y guitarra\nEquipo de sonido\n2 pases en directo\nMúsica ambiental entre pases" },
+      { name: "Evento completo", description: "Desde la ceremonia hasta que se llena la pista.", price: 1100, durationMin: 300, includes: "Formato ampliado con cajón y bajo\nEquipo e iluminación\n3 pases en directo\nDJ set posterior" },
+    ],
+  },
+  { // Trío Azul
+    verified: true, membersCount: 3, minDurationMin: 90, travelRadiusKm: 150,
+    equipmentIncluded: true, languages: "es,en,fr", formats: "acustico",
+    venueTypes: "interior",
+    repertoire: "Standards de jazz vocal, bossa nova y soul clásico: Ella Fitzgerald, Chet Baker, Stevie Wonder, Jobim.",
+    influences: "Diana Krall, Norah Jones, Bill Evans Trio",
+    packages: [
+      { name: "Cóctel", description: "Jazz de fondo mientras llegan los invitados.", price: 900, durationMin: 90, includes: "Voz, piano y contrabajo\nEquipo de sonido\n2 pases de 45 min" },
+      { name: "Cena de gala", description: "Ambiente elegante durante toda la cena.", price: 1300, durationMin: 180, includes: "Trío completo\nEquipo de sonido\n3 pases\nRepertorio personalizado" },
+    ],
+  },
+  { // DJ Numa
+    verified: true, membersCount: 1, minDurationMin: 180, travelRadiusKm: 300,
+    equipmentIncluded: true, languages: "es,en", formats: "electrico",
+    venueTypes: "interior,exterior",
+    repertoire: "House, tech house y los himnos que no fallan. Lectura de pista en tiempo real: si el ambiente pide reggaetón, suena reggaetón.",
+    influences: "Solomun, Black Coffee, Dennis Cruz",
+    packages: [
+      { name: "Sesión básica", description: "Tres horas de pista sin bajones.", price: 350, durationMin: 180, includes: "Sesión DJ\nEquipo de sonido para 100 personas\nIluminación básica" },
+      { name: "Fiesta completa", description: "Toda la noche, con equipo grande.", price: 650, durationMin: 300, includes: "Sesión DJ\nSonido para 250 personas\nIluminación y humo\nMicrófono para discursos" },
+    ],
+  },
+  { // Elena Roig
+    verified: true, membersCount: 1, minDurationMin: 45, travelRadiusKm: 150,
+    equipmentIncluded: false, languages: "es,en,ca", formats: "acustico",
+    venueTypes: "interior,exterior",
+    repertoire: "Repertorio clásico para ceremonia (Pachelbel, Bach, Vivaldi) y versiones actuales para violín: Coldplay, Ed Sheeran, bandas sonoras de cine.",
+    influences: "Lindsey Stirling, Itzhak Perlman",
+    packages: [
+      { name: "Ceremonia", description: "Entrada, momentos clave y salida.", price: 300, durationMin: 45, includes: "Violín solo\nAmplificación si es necesaria\nElección de temas contigo" },
+      { name: "Ceremonia + cóctel", description: "Continúa el ambiente en el aperitivo.", price: 550, durationMin: 120, includes: "Violín solo\nAmplificación\nRepertorio ampliado" },
+    ],
+  },
+  { // Los Hermanos Ruiz
+    verified: true, membersCount: 4, minDurationMin: 60, travelRadiusKm: 250,
+    equipmentIncluded: true, languages: "es", formats: "acustico",
+    venueTypes: "interior,exterior",
+    repertoire: "Cante jondo, bulerías, sevillanas y rumbas. También el repertorio festero que levanta a la gente después del banquete.",
+    influences: "Camarón, Paco de Lucía, Los Chunguitos",
+    packages: [
+      { name: "Cuadro flamenco", description: "Cante, guitarra y palmas.", price: 700, durationMin: 60, includes: "3 artistas\nEquipo de sonido\n2 pases" },
+      { name: "Fiesta flamenca", description: "Con baile y pase festero final.", price: 1200, durationMin: 150, includes: "5 artistas incl. bailaora\nEquipo completo\n3 pases\nTarima de baile" },
+    ],
+  },
+  { // Marco Salinas
+    verified: true, membersCount: 1, minDurationMin: 60, travelRadiusKm: 120,
+    equipmentIncluded: true, languages: "es,en", formats: "acustico,electrico",
+    venueTypes: "interior,exterior",
+    repertoire: "Saxo sobre bases house para cócteles, y standards de jazz para cenas. Puede tocar en formato lounge o subir la energía en la pista.",
+    influences: "Candy Dulfer, Dave Koz, Masego",
+    packages: [
+      { name: "Aperitivo", description: "Saxo en directo durante el cóctel.", price: 280, durationMin: 60, includes: "Saxo + bases\nEquipo propio\n2 pases de 30 min" },
+      { name: "Saxo + DJ", description: "Saxo en directo sobre la sesión del DJ.", price: 500, durationMin: 120, includes: "Saxo en directo\nCoordinación con tu DJ\n3 pases" },
+    ],
+  },
+  { // Duo Habana
+    membersCount: 2, minDurationMin: 90, travelRadiusKm: 180,
+    equipmentIncluded: true, languages: "es,en", formats: "acustico",
+    venueTypes: "interior,exterior",
+    repertoire: "Boleros de toda la vida, son cubano, bachata y salsa suave. Perfectos para que la gente mayor también disfrute.",
+    influences: "Buena Vista Social Club, Compay Segundo",
+    packages: [
+      { name: "Aperitivo latino", description: "Boleros y son durante el cóctel.", price: 500, durationMin: 90, includes: "Voz y guitarra\nEquipo de sonido\n2 pases" },
+    ],
+  },
+  { // Iker Etxeberria
+    verified: true, membersCount: 1, minDurationMin: 90, travelRadiusKm: 120,
+    equipmentIncluded: false, languages: "es,en,eu", formats: "acustico",
+    venueTypes: "interior",
+    repertoire: "Jazz de piano solo, standards americanos, y versiones instrumentales de pop actual. Nada invasivo: música que acompaña la conversación.",
+    influences: "Bill Evans, Ludovico Einaudi, Michel Camilo",
+    packages: [
+      { name: "Piano bar", description: "Ambiente durante cena o cóctel.", price: 320, durationMin: 90, includes: "Piano solo (requiere piano en sala)\n2 pases" },
+      { name: "Velada completa", description: "Toda la noche al piano.", price: 550, durationMin: 180, includes: "Piano solo\n3 pases\nRepertorio a medida" },
+    ],
+  },
+  { // Banda Vintage Club
+    verified: true, membersCount: 6, minDurationMin: 90, travelRadiusKm: 350,
+    equipmentIncluded: true, languages: "es,en", formats: "electrico",
+    venueTypes: "interior,exterior",
+    repertoire: "Swing de los años 40, rock and roll, Motown y grandes éxitos versionados con sección de viento. Vestuario de época incluido.",
+    influences: "The Puppini Sisters, Postmodern Jukebox, Michael Bublé",
+    packages: [
+      { name: "Show swing", description: "Espectáculo de 90 minutos con vestuario.", price: 1200, durationMin: 90, includes: "6 músicos\nVestuario de época\nEquipo e iluminación\n2 pases" },
+      { name: "Gran gala", description: "La banda completa toda la noche.", price: 1900, durationMin: 240, includes: "6 músicos + presentador\nVestuario\nEquipo completo\n3 pases\nDJ entre pases" },
+    ],
+  },
+  { // Nora Campos
+    membersCount: 1, minDurationMin: 60, travelRadiusKm: 150,
+    equipmentIncluded: true, languages: "es,en", formats: "acustico,electrico",
+    venueTypes: "interior,exterior",
+    repertoire: "Soul y pop actual con arreglos propios: Alicia Keys, Aretha, Dua Lipa, Rosalía. Formato acústico o con banda.",
+    influences: "Alicia Keys, Aretha Franklin, India Martínez",
+    packages: [
+      { name: "Acústico", description: "Voz y guitarra para momentos íntimos.", price: 400, durationMin: 60, includes: "Voz y guitarra\nEquipo de sonido\n2 pases" },
+      { name: "Con banda", description: "Formato completo para llenar la pista.", price: 900, durationMin: 120, includes: "4 músicos\nEquipo e iluminación\n3 pases" },
+    ],
   },
 ];
 
@@ -344,8 +512,8 @@ async function main() {
   for (const [i, t] of ARTIST_TYPES.entries()) {
     await prisma.artistType.upsert({
       where: { slug: t.slug },
-      update: { label: t.label, icon: t.icon, order: i },
-      create: { slug: t.slug, label: t.label, icon: t.icon, order: i },
+      update: { label: t.label, icon: t.icon, order: i, kind: t.kind },
+      create: { slug: t.slug, label: t.label, icon: t.icon, order: i, kind: t.kind },
     });
   }
   for (const [i, g] of GENRES.entries()) {
@@ -418,10 +586,29 @@ async function main() {
 
     const ratingCount = 2 + (idx % 4);
     const ratingAvg = 4.4 + ((idx * 7) % 6) / 10; // entre 4.4 y 4.9
+    const detail: Partial<MusicianSeed> = MUSICIAN_DETAILS[idx] ?? {};
+
+    // Los campos de marketplace se re-aplican también en `update` para que
+    // re-ejecutar el seed sobre una BD ya poblada refresque los perfiles
+    // existentes en vez de dejarlos con los valores por defecto.
+    const marketplaceFields = {
+      verified: detail.verified ?? false,
+      respondsFast: idx % 3 !== 2,
+      gigsCount: 20 + m.yearsExperience * 9 + (idx % 7) * 4,
+      membersCount: detail.membersCount,
+      minDurationMin: detail.minDurationMin,
+      travelRadiusKm: detail.travelRadiusKm,
+      equipmentIncluded: detail.equipmentIncluded ?? false,
+      languages: detail.languages,
+      formats: detail.formats,
+      venueTypes: detail.venueTypes,
+      repertoire: detail.repertoire,
+      influences: detail.influences,
+    };
 
     const profile = await prisma.musicianProfile.upsert({
       where: { slug },
-      update: {},
+      update: marketplaceFields,
       create: {
         userId: user.id,
         slug,
@@ -443,12 +630,29 @@ async function main() {
         contactEmail: email,
         ratingAvg: Math.round(ratingAvg * 10) / 10,
         ratingCount,
+        ...marketplaceFields,
         artistTypes: { connect: m.artistTypes.map((s) => ({ slug: s })) },
         genres: { connect: m.genres.map((s) => ({ slug: s })) },
         eventTypes: { connect: m.eventTypes.map((s) => ({ slug: s })) },
         instruments: { connect: m.instruments.map((s) => ({ slug: s })) },
       },
     });
+
+    // Paquetes de precio configurables (se regeneran en cada seed)
+    await prisma.pricingPackage.deleteMany({ where: { musicianId: profile.id } });
+    if (detail.packages?.length) {
+      await prisma.pricingPackage.createMany({
+        data: detail.packages.map((p, order) => ({
+          musicianId: profile.id,
+          name: p.name,
+          description: p.description,
+          price: p.price,
+          durationMin: p.durationMin,
+          includes: p.includes,
+          order,
+        })),
+      });
+    }
 
     createdProfiles.push({ id: profile.id, slug });
 
@@ -503,16 +707,25 @@ async function main() {
       });
     }
 
-    // Reseñas aprobadas + 1 pendiente de moderación en el primer músico
+    // Reseñas aprobadas + 1 pendiente de moderación en el primer músico.
+    // Las primeras se marcan como "contratación verificada" (vía Sonora).
     for (let r = 0; r < ratingCount; r++) {
+      const base = 4 + ((idx + r) % 2);
+      const jitter = (n: number) => Math.min(5, Math.max(3, base + ((idx + r + n) % 3) - 1));
       await prisma.review.create({
         data: {
           musicianId: profile.id,
           authorName: REVIEW_AUTHORS[(idx + r) % REVIEW_AUTHORS.length],
           eventType: m.eventTypes[r % m.eventTypes.length],
-          rating: 4 + ((idx + r) % 2),
+          rating: base,
           comment: REVIEW_COMMENTS[(idx + r) % REVIEW_COMMENTS.length],
           approved: true,
+          verifiedBooking: r < 2,
+          ratingMusic: jitter(0),
+          ratingProfessionalism: jitter(1),
+          ratingPunctuality: jitter(2),
+          ratingCommunication: jitter(3),
+          ratingValue: jitter(4),
         },
       });
     }

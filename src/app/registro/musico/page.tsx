@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { RegisterMusicianForm } from "@/components/register-musician-form";
 
-export const metadata: Metadata = { title: "Regístrate como músico | Sonora" };
+export const metadata: Metadata = { title: "Regístrate como músico" };
 
 export default function RegisterMusicianPage() {
   return (

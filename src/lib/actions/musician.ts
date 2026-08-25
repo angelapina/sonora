@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { profileUpdateSchema } from "@/lib/validations";
+import { calculateBreakdown, PAYOUT_HOLD_HOURS } from "@/lib/pricing";
+import type { Prisma } from "@prisma/client";
 
 export type ActionState = {
   ok: boolean;
@@ -148,12 +150,59 @@ export async function toggleAvailability(dateISO: string) {
   return { ok: true, blocked: !existing };
 }
 
-export async function updateBookingStatus(bookingId: string, status: "accepted" | "declined" | "completed") {
+export async function updateBookingStatus(
+  bookingId: string,
+  status: "accepted" | "declined" | "completed",
+  /** Caché acordado. Obligatorio al aceptar: sin precio no hay reserva. */
+  agreedPrice?: number
+) {
   const profile = await requireMusician();
-  await prisma.bookingRequest.updateMany({
+
+  const booking = await prisma.bookingRequest.findFirst({
     where: { id: bookingId, musicianId: profile.id },
-    data: { status },
   });
+  if (!booking) return { ok: false, message: "Solicitud no encontrada." };
+
+  const data: Prisma.BookingRequestUpdateInput = { status };
+
+  if (status === "accepted") {
+    // Al aceptar se congelan los importes con las tarifas vigentes hoy: si
+    // Sonora cambia sus comisiones más adelante, esta reserva conserva lo
+    // pactado. Es la misma lógica por la que Airbnb fija el precio al reservar.
+    const price = agreedPrice ?? booking.agreedPrice ?? booking.budgetMax ?? booking.budgetMin;
+    if (!price) {
+      return {
+        ok: false,
+        message: "Indica el caché acordado antes de aceptar la solicitud.",
+      };
+    }
+    const b = calculateBreakdown(price);
+    data.agreedPrice = Math.round(b.basePrice);
+    data.clientFee = Math.round(b.clientFee);
+    data.clientTotal = Math.round(b.clientTotal);
+    data.artistCommission = Math.round(b.artistCommission);
+    data.artistPayout = Math.round(b.artistPayout);
+    data.paymentStatus = "deposit_pending";
+    data.cancellationPolicy = profile.cancellationPolicy;
+
+    // El dinero se libera PAYOUT_HOLD_HOURS después del evento.
+    if (booking.eventDate) {
+      const release = new Date(booking.eventDate);
+      release.setHours(release.getHours() + PAYOUT_HOLD_HOURS);
+      data.payoutReleaseAt = release;
+    }
+  }
+
+  if (status === "completed") {
+    data.paymentStatus = "released";
+  }
+
+  if (status === "declined") {
+    data.paymentStatus = "none";
+  }
+
+  await prisma.bookingRequest.update({ where: { id: bookingId }, data });
+
   revalidatePath("/dashboard/solicitudes");
   revalidatePath(`/dashboard/solicitudes/${bookingId}`);
   return { ok: true };

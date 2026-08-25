@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { RegisterClientForm } from "@/components/register-client-form";
 
-export const metadata: Metadata = { title: "Crear cuenta de cliente | Sonora" };
+export const metadata: Metadata = { title: "Crear cuenta de cliente" };
 
 export default function RegisterClientPage() {
   return (

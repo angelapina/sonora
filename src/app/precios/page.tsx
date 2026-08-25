@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 
-export const metadata: Metadata = { title: "Planes y precios para músicos | Sonora" };
+export const metadata: Metadata = { title: "Planes y precios para músicos" };
 
 const PLANS = [
   {
